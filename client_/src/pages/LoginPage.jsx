@@ -1,0 +1,69 @@
+import React, {useState} from 'react';
+import "../styles/Login.scss";
+import {setLogin} from "../redux/state";
+import {useDispatch} from "react-redux";
+import {useNavigate} from "react-router-dom";
+
+const LoginPage = () => {
+    const [email, setEmail] = useState("")
+    const navigate = useNavigate()
+    const [password, setPassword] = useState("")
+    const dispatch = useDispatch()
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        try {
+            const response = await fetch("http://localhost:3001/auth/login", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({email, password})
+            })
+            const loggedIn = await response.json();
+            if (loggedIn) {
+                dispatch(
+                    setLogin({
+                        user: loggedIn.user,
+                        token: loggedIn.token
+                    })
+                )
+                navigate("/")
+            }
+
+        } catch (err) {
+            console.log("Login failed", err.message);
+        }
+    }
+    return (
+        <div className="login">
+            <div className="login_content">
+                <form
+                    onSubmit={handleSubmit}
+                    className="login_content_form">
+                    <input
+                        placeholder="Email"
+                        name="email"
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <input
+                        placeholder="Password"
+                        name="password"
+                        type="password"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button type="submit">
+                        Login
+                    </button>
+                </form>
+                <a href="/register">
+                    Don't have an account? Register here!
+                </a>
+            </div>
+        </div>
+    );
+};
+
+export default LoginPage;
